@@ -10,10 +10,12 @@
 package io.ddavison.conductor;
 
 import com.google.common.base.Strings;
+import io.ddavison.conductor.util.JvmUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.After;
+import org.junit.Assert;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -32,7 +34,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.util.*;
 import java.util.NoSuchElementException;
@@ -94,41 +95,7 @@ public class Locomotive implements Conductor<Locomotive> {
          */
         final Config testConfiguration = getClass().getAnnotation(Config.class);
 
-        configuration = new Config() {
-            @Override
-            public String url() {
-                String url = "";
-                if (!StringUtils.isEmpty(getJvmProperty("CONDUCTOR_URL"))) url = getJvmProperty("CONDUCTOR_URL");
-                if (!StringUtils.isEmpty(props.getProperty("url"))) url = props.getProperty("url");
-                if (testConfiguration != null && (!StringUtils.isEmpty(testConfiguration.url()))) url = testConfiguration.url();
-                return url;
-            }
-
-            @Override
-            public Browser browser() {
-                Browser browser = Browser.NONE;
-                if (!StringUtils.isEmpty(getJvmProperty("CONDUCTOR_BROWSER")))
-                    browser = Browser.valueOf(getJvmProperty("CONDUCTOR_BROWSER").toUpperCase());
-                if (testConfiguration != null && testConfiguration.browser() != Browser.NONE) return testConfiguration.browser();
-                if (!StringUtils.isEmpty(props.getProperty("browser")))
-                    browser = Browser.valueOf(props.getProperty("browser").toUpperCase());
-                return browser;
-            }
-
-            @Override
-            public String hub() {
-                String hub = "";
-                if (!StringUtils.isEmpty(getJvmProperty("CONDUCTOR_HUB"))) hub = getJvmProperty("CONDUCTOR_HUB");
-                if (!StringUtils.isEmpty(props.getProperty("hub"))) hub = props.getProperty("hub");
-                if (testConfiguration != null && (!StringUtils.isEmpty(testConfiguration.hub()))) hub = testConfiguration.hub();
-                return hub;
-            }
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return null;
-            }
-        };
+        configuration = new LocomotiveConfig(testConfiguration, props);
 
         Capabilities capabilities;
 
@@ -137,7 +104,8 @@ public class Locomotive implements Conductor<Locomotive> {
         log.debug(String.format("\n=== Configuration ===\n" +
         "\tURL:     %s\n" +
         "\tBrowser: %s\n" +
-        "\tHub:     %s\n", configuration.url(), configuration.browser().moniker, configuration.hub()));
+        "\tHub:     %s\n" +
+        "\tBase url: %s\n", configuration.url(), configuration.browser().moniker, configuration.hub(), configuration.baseUrl()));
 
         boolean isLocal = StringUtils.isEmpty(configuration.hub());
 
@@ -231,25 +199,16 @@ public class Locomotive implements Conductor<Locomotive> {
         if (StringUtils.isNotEmpty(baseUrl)) driver.navigate().to(baseUrl);
     }
 
-    /**
-     * Get a Jvm property / environment variable
-     * @param prop the property to get
-     * @return the property value
-     */
-    private static String getJvmProperty(String prop) {
-        return (System.getProperty(prop, System.getenv(prop)));
-    }
-
     static {
         // Set the webdriver env vars.
-        if (getJvmProperty("os.name").toLowerCase().contains("mac")) {
+        if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("mac")) {
             System.setProperty("webdriver.chrome.driver", findFile("chromedriver.mac"));
-        } else if (getJvmProperty("os.name").toLowerCase().contains("nix") ||
-                   getJvmProperty("os.name").toLowerCase().contains("nux") ||
-                   getJvmProperty("os.name").toLowerCase().contains("aix")
+        } else if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("nix") ||
+                   JvmUtil.getJvmProperty("os.name").toLowerCase().contains("nux") ||
+                   JvmUtil.getJvmProperty("os.name").toLowerCase().contains("aix")
         ) {
             System.setProperty("webdriver.chrome.driver", findFile("chromedriver.linux"));
-        } else if (getJvmProperty("os.name").toLowerCase().contains("win")) {
+        } else if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("win")) {
             System.setProperty("webdriver.chrome.driver", findFile("chromedriver.exe"));
             System.setProperty("webdriver.ie.driver", findFile("iedriver.exe"));
         } else {
@@ -271,30 +230,56 @@ public class Locomotive implements Conductor<Locomotive> {
         driver.quit();
     }
 
+    @Override
+    public WebElement waitForElement(String css) {
+        return waitForElement(By.cssSelector(css));
+    }
+
     /**
      * Method that acts as an arbiter of implicit timeouts of sorts.. sort of like a Wait For Ajax method.
      */
     public WebElement waitForElement(By by) {
-        int attempts = 0;
-        int size = driver.findElements(by).size();
+        int size = waitForElements(by).size();
 
-        while (size == 0) {
-            size = driver.findElements(by).size();
-            if (attempts == MAX_ATTEMPTS) fail(String.format("Could not find %s after %d seconds",
-                                                             by.toString(),
-                                                             MAX_ATTEMPTS));
-            attempts++;
-            try {
-                Thread.sleep(1000); // sleep for 1 second.
-            } catch (Exception x) {
-                fail("Failed due to an exception during Thread.sleep!");
-                x.printStackTrace();
-            }
+        if (size == 0) {
+            Assert.fail(String.format("Could not find %s after %d attempts",
+                    by.toString(),
+                    MAX_ATTEMPTS));
         }
 
-        if (size > 1) System.err.println("WARN: There are more than 1 " + by.toString() + " 's!");
+        if (size > 1) {
+            System.err.println("WARN: There are more than 1 " + by.toString() + " 's!");
+        }
 
         return driver.findElement(by);
+    }
+
+    @Override
+    public List<WebElement> waitForElements(String css) {
+        return waitForElements(By.cssSelector(css));
+    }
+
+    @Override
+    public List<WebElement> waitForElements(By by) {
+        List<WebElement> elements = driver.findElements(by);
+
+        if (elements.size() == 0) {
+            int attempts = 1;
+            while (attempts <= MAX_ATTEMPTS) {
+                try {
+                    Thread.sleep(1000); // sleep for 1 second.
+                } catch (Exception e) {
+                    Assert.fail("Failed due to an exception during Thread.sleep! - " + e.getMessage());
+                }
+
+                elements = driver.findElements(by);
+                if (elements.size() > 0) {
+                    break;
+                }
+                attempts++;
+            }
+        }
+        return elements;
     }
 
     /**
