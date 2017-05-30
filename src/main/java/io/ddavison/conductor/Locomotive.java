@@ -112,7 +112,7 @@ public class Locomotive implements Conductor<Locomotive> {
 
         configuration = new LocomotiveConfig(testConfiguration, props);
 
-        Capabilities capabilities;
+        DesiredCapabilities capabilities;
 
         baseUrl = configuration.url();
 
@@ -135,6 +135,10 @@ public class Locomotive implements Conductor<Locomotive> {
 
                     if (herokuChromeDriver != null && !herokuChromeDriver.isEmpty()) {
                         System.setProperty("webdriver.chrome.driver", herokuChromeDriver);
+
+                        DesiredCapabilities chromeOptions = new DesiredCapabilities();
+                        chromeOptions.setCapability("binary", herokuChromeDriver);
+                        capabilities.setCapability("chromeOptions", chromeOptions);
                     }
 
                     ChromeDriverService service = new ChromeDriverService.Builder()
