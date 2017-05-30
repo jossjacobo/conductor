@@ -141,13 +141,7 @@ public class Locomotive implements Conductor<Locomotive> {
                         chromeOptions.setCapability("args", "--headless");
                         capabilities.setCapability("chromeOptions", chromeOptions);
                     }
-
-                    ChromeDriverService service = new ChromeDriverService.Builder()
-                            .usingDriverExecutable(new File(JvmUtil.getJvmProperty("webdriver.chrome.driver")))
-                            .usingAnyFreePort()
-                            .build();
-
-                    driver = new ChromeDriver(service, capabilities);
+                    driver = new ChromeDriver(capabilities);
                 } catch (Exception x) {
                     logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
                     System.exit(1);
