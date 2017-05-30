@@ -1,4 +1,5 @@
 {
+  "stack": "cedar-14",
   "environments": {
     "test": {
       "buildpacks": [
