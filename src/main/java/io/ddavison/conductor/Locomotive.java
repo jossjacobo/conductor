@@ -78,7 +78,7 @@ public class Locomotive implements Conductor<Locomotive> {
     static {
         // Set the webdriver env vars.
         String herokuChromeDriver = JvmUtil.getJvmProperty("GOOGLE_CHROME_BIN");
-        if (herokuChromeDriver != null && !herokuChromeDriver.isEmpty()) {
+        if (herokuChromeDriver == null || herokuChromeDriver.isEmpty()) {
             if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("mac")) {
                 System.setProperty("webdriver.chrome.driver", findFile("chromedriver.mac"));
                 System.setProperty("webdriver.gecko.driver", findFile("geckodriver.mac"));
