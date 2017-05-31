@@ -24,6 +24,7 @@ import org.junit.runner.Description;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -134,12 +135,14 @@ public class Locomotive implements Conductor<Locomotive> {
                     System.out.println("GOOGLE_CHROME_BIN: " + herokuChromeDriver);
 
                     if (herokuChromeDriver != null && !herokuChromeDriver.isEmpty()) {
+                        System.out.println("webdriver.chrome.driver: " + JvmUtil.getJvmProperty("webdriver.chrome.driver"));
                         System.setProperty("webdriver.chrome.driver", herokuChromeDriver);
+                        System.out.println("webdriver.chrome.driver: " + JvmUtil.getJvmProperty("webdriver.chrome.driver"));
 
-                        DesiredCapabilities chromeOptions = new DesiredCapabilities();
-                        chromeOptions.setCapability("binary", herokuChromeDriver);
-                        chromeOptions.setCapability("args", "--headless --no-sandbox --disable-gpu");
-                        capabilities.setCapability("chromeOptions", chromeOptions);
+                        ChromeOptions chromeOptions = new ChromeOptions();
+                        chromeOptions.setBinary(herokuChromeDriver);
+                        chromeOptions.addArguments("--headless", "--no-sandbox", "--disable-gpu");
+                        capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
                     }
                     System.out.println("Capabilities: " + capabilities.toString());
                     driver = new ChromeDriver(capabilities);
