@@ -136,11 +136,11 @@ public class Locomotive implements Conductor<Locomotive> {
 
                     if (herokuChromeDriver != null && !herokuChromeDriver.isEmpty()) {
                         System.out.println("webdriver.chrome.driver: " + JvmUtil.getJvmProperty("webdriver.chrome.driver"));
-                        System.setProperty("webdriver.chrome.driver", herokuChromeDriver);
-                        System.out.println("webdriver.chrome.driver: " + JvmUtil.getJvmProperty("webdriver.chrome.driver"));
+//                        System.setProperty("webdriver.chrome.driver", herokuChromeDriver);
+//                        System.out.println("webdriver.chrome.driver: " + JvmUtil.getJvmProperty("webdriver.chrome.driver"));
 
                         ChromeOptions chromeOptions = new ChromeOptions();
-                        chromeOptions.setBinary(herokuChromeDriver);
+                        chromeOptions.setBinary(JvmUtil.getJvmProperty("webdriver.chrome.driver"));
                         chromeOptions.addArguments("--headless", "--no-sandbox", "--disable-gpu");
                         capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
                     }
