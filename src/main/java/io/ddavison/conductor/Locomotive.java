@@ -138,7 +138,7 @@ public class Locomotive implements Conductor<Locomotive> {
 
                         DesiredCapabilities chromeOptions = new DesiredCapabilities();
                         chromeOptions.setCapability("binary", herokuChromeDriver);
-                        chromeOptions.setCapability("args", "--headless");
+                        chromeOptions.setCapability("args", "--headless --no-sandbox");
                         capabilities.setCapability("chromeOptions", chromeOptions);
                     }
                     driver = new ChromeDriver(capabilities);
