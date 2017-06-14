@@ -7,6 +7,9 @@
           "url": "https://github.com/heroku/heroku-buildpack-xvfb-google-chrome"
         },
         {
+          "url": "https://github.com/heroku/heroku-buildpack-chromedriver"
+        },
+        {
           "url": "https://github.com/heroku/heroku-buildpack-java"
         }
       ],
