@@ -1,12 +1,16 @@
 {
+  "stack": "cedar-14",
   "environments": {
     "test": {
       "buildpacks": [
         {
+          "url": "https://github.com/heroku/heroku-buildpack-xvfb-google-chrome"
+        },
+        {
           "url": "https://github.com/heroku/heroku-buildpack-chromedriver"
         },
         {
-          "url": "https://github.com/heroku/heroku-buildpack-xvfb-google-chrome"
+          "url": "https://github.com/heroku/heroku-buildpack-java"
         }
       ],
       "scripts": {

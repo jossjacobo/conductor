@@ -25,6 +25,7 @@ import org.junit.runner.Description;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -77,19 +78,22 @@ public class Locomotive implements Conductor<Locomotive> {
 
     static {
         // Set the webdriver env vars.
-        if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("mac")) {
-            System.setProperty("webdriver.chrome.driver", findFile("chromedriver.mac"));
-            System.setProperty("webdriver.gecko.driver", findFile("geckodriver.mac"));
+        String herokuChromeDriver = JvmUtil.getJvmProperty("GOOGLE_CHROME_BIN");
+        if (herokuChromeDriver == null || herokuChromeDriver.isEmpty()) {
+            if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("mac")) {
+                System.setProperty("webdriver.chrome.driver", findFile("chromedriver.mac"));
+                System.setProperty("webdriver.gecko.driver", findFile("geckodriver.mac"));
 
-        } else if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("nix") || JvmUtil.getJvmProperty("os.name").toLowerCase().contains("nux") || JvmUtil.getJvmProperty("os.name").toLowerCase().contains("aix")) {
-            System.setProperty("webdriver.chrome.driver", findFile("chromedriver.linux"));
-            System.setProperty("webdriver.gecko.driver", findFile("geckodriver.linux"));
+            } else if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("nix") || JvmUtil.getJvmProperty("os.name").toLowerCase().contains("nux") || JvmUtil.getJvmProperty("os.name").toLowerCase().contains("aix")) {
+                System.setProperty("webdriver.chrome.driver", findFile("chromedriver.linux"));
+                System.setProperty("webdriver.gecko.driver", findFile("geckodriver.linux"));
 
-        } else if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("win")) {
-            System.setProperty("webdriver.chrome.driver", findFile("chromedriver.exe"));
-            System.setProperty("webdriver.gecko.driver", findFile("geckodriver.exe"));
-            System.setProperty("webdriver.ie.driver", findFile("iedriver.exe"));
-            System.setProperty("webdriver.edge.driver", findFile("MicrosoftWebDriver.exe"));
+            } else if (JvmUtil.getJvmProperty("os.name").toLowerCase().contains("win")) {
+                System.setProperty("webdriver.chrome.driver", findFile("chromedriver.exe"));
+                System.setProperty("webdriver.gecko.driver", findFile("geckodriver.exe"));
+                System.setProperty("webdriver.ie.driver", findFile("iedriver.exe"));
+                System.setProperty("webdriver.edge.driver", findFile("MicrosoftWebDriver.exe"));
+            }
         }
     }
 
@@ -108,7 +112,7 @@ public class Locomotive implements Conductor<Locomotive> {
 
         configuration = new LocomotiveConfig(testConfiguration, props);
 
-        Capabilities capabilities;
+        DesiredCapabilities capabilities;
 
         baseUrl = configuration.url();
 
@@ -131,14 +135,16 @@ public class Locomotive implements Conductor<Locomotive> {
 
                     if (herokuChromeDriver != null && !herokuChromeDriver.isEmpty()) {
                         System.setProperty("webdriver.chrome.driver", herokuChromeDriver);
+                        System.out.println("webdriver.chrome.driver: " + JvmUtil.getJvmProperty("webdriver.chrome.driver"));
+
+                        ChromeOptions chromeOptions = new ChromeOptions();
+                        chromeOptions.setBinary(herokuChromeDriver);
+                        chromeOptions.addArguments("--headless", "--no-sandbox", "--disable-gpu");
+                        System.out.println("Capabilities: " + capabilities.toString());
+                        System.out.print("chromeOptions: " + chromeOptions.toJson().toString());
+                        capabilities.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
                     }
-
-                    ChromeDriverService service = new ChromeDriverService.Builder()
-                            .usingDriverExecutable(new File(JvmUtil.getJvmProperty("webdriver.chrome.driver")))
-                            .usingAnyFreePort()
-                            .build();
-
-                    driver = new ChromeDriver(service, capabilities);
+                    driver = new ChromeDriver(capabilities);
                 } catch (Exception x) {
                     logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
                     System.exit(1);
