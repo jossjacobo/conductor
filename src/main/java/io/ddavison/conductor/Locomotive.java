@@ -109,14 +109,6 @@ public class Locomotive implements Conductor<Locomotive> {
                 if (isLocal) try {
                     ChromeDriverManager.getInstance().setup();
 
-                    // Heroku Check
-                    String herokuChromeDriver = JvmUtil.getJvmProperty("GOOGLE_CHROME_BIN");
-                    System.out.println("GOOGLE_CHROME_BIN: " + herokuChromeDriver);
-
-                    if (herokuChromeDriver != null && !herokuChromeDriver.isEmpty()) {
-                        System.setProperty("webdriver.chrome.driver", herokuChromeDriver);
-                    }
-
                     ChromeDriverService service = new ChromeDriverService.Builder()
                             .usingDriverExecutable(new File(JvmUtil.getJvmProperty("webdriver.chrome.driver")))
                             .usingAnyFreePort()
