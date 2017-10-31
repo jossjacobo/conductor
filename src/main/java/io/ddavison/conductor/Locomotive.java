@@ -10,7 +10,6 @@
 package io.ddavison.conductor;
 
 import com.google.common.base.Strings;
-import io.ddavison.conductor.util.JvmUtil;
 import io.ddavison.conductor.util.PropertiesUtil;
 import io.ddavison.conductor.util.ScreenShotUtil;
 import io.github.bonigarcia.wdm.*;
@@ -25,7 +24,6 @@ import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
@@ -109,12 +107,7 @@ public class Locomotive implements Conductor<Locomotive> {
                 if (isLocal) try {
                     ChromeDriverManager.getInstance().setup();
 
-                    ChromeDriverService service = new ChromeDriverService.Builder()
-                            .usingDriverExecutable(new File(JvmUtil.getJvmProperty("webdriver.chrome.driver")))
-                            .usingAnyFreePort()
-                            .build();
-
-                    driver = new ChromeDriver(service, capabilities);
+                    driver = new ChromeDriver(capabilities);
                 } catch (Exception x) {
                     logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
                     System.exit(1);
