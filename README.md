@@ -109,3 +109,5 @@ steps to make a new release are therefor:
 2. Create a new pull request from the release branch to the master branch
 3. If approved merge release branch into master
 4. Tag the merge (with release notes) in the master branch with `x.x.x` (this will make this version available in jitpack)
+5. Create a new pull request from master to develop so all changes are back in develop
+6. If approved merge master branch into develop
