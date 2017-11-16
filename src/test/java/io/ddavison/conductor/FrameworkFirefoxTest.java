@@ -9,6 +9,8 @@
 
 package io.ddavison.conductor;
 
-@Config(browser = Browser.FIREFOX)
+@Config(
+        browser = Browser.FIREFOX,
+        path = "/tests/getting-started-with-selenium.htm")
 public class FrameworkFirefoxTest extends FrameworkTest {
 }

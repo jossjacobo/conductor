@@ -13,5 +13,7 @@ package io.ddavison.conductor;
  * @author {ddavison}
  * @since Nov 05, 2014
  */
-@Config(url="http://google.com", browser=Browser.CHROME)
+@Config(
+        browser = Browser.CHROME,
+        path = "/tests/getting-started-with-selenium.htm")
 public class SuperClassTest extends Locomotive {}

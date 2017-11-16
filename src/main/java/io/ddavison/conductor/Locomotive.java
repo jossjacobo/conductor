@@ -10,7 +10,6 @@
 package io.ddavison.conductor;
 
 import com.google.common.base.Strings;
-import io.ddavison.conductor.util.PropertiesUtil;
 import io.ddavison.conductor.util.ScreenShotUtil;
 import io.github.bonigarcia.wdm.*;
 import org.apache.commons.lang3.StringUtils;
@@ -37,9 +36,10 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.io.File;
-import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +56,7 @@ public class Locomotive implements Conductor<Locomotive> {
     /**
      * All test configuration in here
      */
-    public LocomotiveConfig configuration;
+    public ConductorConfig configuration;
 
     public WebDriver driver;
 
@@ -66,42 +66,24 @@ public class Locomotive implements Conductor<Locomotive> {
 
     private Map<String, String> vars = new HashMap<String, String>();
 
-    /**
-     * The url that an automated test will be testing.
-     */
-    public String baseUrl;
-
     private Pattern p;
     private Matcher m;
 
     public Locomotive() {
-        final Properties props = new PropertiesUtil().loadDefault();
+        Config testConfiguration = getClass().getAnnotation(Config.class);
 
-        /*
-         * Order of overrides:
-         * <ol>
-         *     <li>Test</li>
-         *     <li>JVM Arguments</li>
-         *     <li>Default properties</li>
-         * </ol>
-         */
-        final Config testConfiguration = getClass().getAnnotation(Config.class);
-
-        configuration = new LocomotiveConfig(testConfiguration, props);
+        configuration = new ConductorConfig(testConfiguration);
 
         Capabilities capabilities;
-
-        baseUrl = configuration.url();
 
         log.debug(String.format("\n=== Configuration ===\n" +
                 "\tURL:     %s\n" +
                 "\tBrowser: %s\n" +
                 "\tHub:     %s\n" +
-                "\tBase url: %s\n", configuration.url(), configuration.browser().moniker, configuration.hub(), configuration.baseUrl()));
+                "\tBase url: %s\n", configuration.getUrl(), configuration.getBrowser().moniker, configuration.getHub(), configuration.getBaseUrl()));
 
-        boolean isLocal = StringUtils.isEmpty(configuration.hub());
-
-        switch (configuration.browser()) {
+        boolean isLocal = configuration.getHub() == null;
+        switch (configuration.getBrowser()) {
             case CHROME:
                 capabilities = DesiredCapabilities.chrome();
                 if (isLocal) try {
@@ -168,35 +150,26 @@ public class Locomotive implements Conductor<Locomotive> {
                 }
                 break;
             default:
-                System.err.println("Unknown browser: " + configuration.browser());
+                System.err.println("Unknown browser: " + configuration.getBrowser());
                 return;
         }
 
         if (!isLocal)
-            // they are using a hub.
             try {
-                driver = new RemoteWebDriver(new URL(configuration.hub()), capabilities); // just override the driver.
+                driver = new RemoteWebDriver(configuration.getHub(), capabilities);
             } catch (Exception x) {
-                logFatal("Couldn't connect to hub: " + configuration.hub());
+                logFatal("Couldn't connect to hub: " + configuration.getHub().toString());
                 x.printStackTrace();
                 return;
             }
 
         actions = new Actions(driver);
 
-        if (StringUtils.isNotEmpty(baseUrl)) {
-            driver.navigate().to(baseUrl);
-        }
-    }
 
-    static public String findFile(String filename) {
-        String paths[] = {"", "bin/", "target/classes"}; // if you have chromedriver somewhere else on the path, then put it here.
-        for (String path : paths) {
-            if (new File(path + filename).exists()) {
-                return path + filename;
-            }
+        // Automatically start test on url
+        if (StringUtils.isNotEmpty(configuration.getUrl())) {
+            driver.navigate().to(configuration.getUrl());
         }
-        return "";
     }
 
     @Rule
@@ -208,7 +181,7 @@ public class Locomotive implements Conductor<Locomotive> {
 
         @Override
         protected void failed(Throwable e, Description description) {
-            if (configuration.screenshotsOnFail()) {
+            if (configuration.isScreenshotOnFail()) {
                 failure = true;
                 this.e = e;
                 this.description = description;
@@ -221,7 +194,7 @@ public class Locomotive implements Conductor<Locomotive> {
         @Override
         protected void finished(Description description) {
             super.finished(description);
-            if (configuration.screenshotsOnFail()) {
+            if (configuration.isScreenshotOnFail()) {
                 if (failure) {
                     ScreenShotUtil.take(Locomotive.this,
                             description.getDisplayName(),
@@ -234,7 +207,7 @@ public class Locomotive implements Conductor<Locomotive> {
 
     @After
     public void teardown() {
-        if (!configuration.screenshotsOnFail()) {
+        if (!configuration.isScreenshotOnFail()) {
             driver.quit();
         }
     }
@@ -253,7 +226,7 @@ public class Locomotive implements Conductor<Locomotive> {
         if (size == 0) {
             Assertions.fail(String.format("Could not find %s after %d attempts",
                     by.toString(),
-                    configuration.retries()));
+                    configuration.getRetries()));
         } else {
             // If an element is found then scroll to it.
             scrollTo(elements.get(0));
@@ -275,7 +248,7 @@ public class Locomotive implements Conductor<Locomotive> {
 
         if (elements.size() == 0) {
             int attempts = 1;
-            while (attempts <= configuration.retries()) {
+            while (attempts <= configuration.getRetries()) {
                 try {
                     Thread.sleep(1000); // sleep for 1 second.
                 } catch (Exception e) {
@@ -318,7 +291,7 @@ public class Locomotive implements Conductor<Locomotive> {
      * @return The implementing class for fluency
      */
     public Locomotive waitForCondition(ExpectedCondition<?> condition) {
-        return waitForCondition(condition, configuration.timeout());
+        return waitForCondition(condition, configuration.getTimeout());
     }
 
     /**
@@ -516,7 +489,7 @@ public class Locomotive implements Conductor<Locomotive> {
                     }
                 }
             } catch (NoSuchWindowException e) {
-                if (attempts <= configuration.retries()) {
+                if (attempts <= configuration.getRetries()) {
                     attempts++;
 
                     try {
@@ -527,17 +500,17 @@ public class Locomotive implements Conductor<Locomotive> {
 
                     return waitForWindow(regex);
                 } else {
-                    Assertions.fail("Window with url|title: " + regex + " did not appear after " + configuration.retries() + " tries. Exiting.", e);
+                    Assertions.fail("Window with url|title: " + regex + " did not appear after " + configuration.getRetries() + " tries. Exiting.", e);
                 }
             }
         }
 
         // when we reach this point, that means no window exists with that title..
-        if (attempts == configuration.retries()) {
-            Assertions.fail("Window with title: " + regex + " did not appear after " + configuration.retries() + " tries. Exiting.");
+        if (attempts == configuration.getRetries()) {
+            Assertions.fail("Window with title: " + regex + " did not appear after " + configuration.getRetries() + " tries. Exiting.");
             return this;
         } else {
-            System.out.println("#waitForWindow() : Window doesn't exist yet. [" + regex + "] Trying again. " + (attempts + 1) + "/" + configuration.retries());
+            System.out.println("#waitForWindow() : Window doesn't exist yet. [" + regex + "] Trying again. " + (attempts + 1) + "/" + configuration.getRetries());
             attempts++;
             try {
                 Thread.sleep(1000);
@@ -854,7 +827,7 @@ public class Locomotive implements Conductor<Locomotive> {
         if (url.contains("://")) {
             driver.navigate().to(url);
         } else if (url.startsWith("/")) {
-            driver.navigate().to(baseUrl.concat(url));
+            driver.navigate().to(configuration.getBaseUrl().concat(url));
         } else {
             driver.navigate().to(driver.getCurrentUrl().concat(url));
         }

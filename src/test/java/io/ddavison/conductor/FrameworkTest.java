@@ -10,7 +10,9 @@
 package io.ddavison.conductor;
 
 import org.junit.Test;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -18,7 +20,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @Config(
         browser = Browser.CHROME,
-        url = "http://ddavison.io/tests/getting-started-with-selenium.htm")
+        path = "/tests/getting-started-with-selenium.htm")
 public class FrameworkTest extends Locomotive {
 
     private static final String NEW_TAB_LINK_CSS = "a[href='http://google.com']";

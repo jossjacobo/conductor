@@ -9,7 +9,9 @@
 
 package io.ddavison.conductor;
 
-@Config(browser = Browser.SAFARI)
+@Config(
+        browser = Browser.SAFARI,
+        path = "/tests/getting-started-with-selenium.htm")
 public class FrameworkSafariTest extends FrameworkTest {
     @Override
     public void testWindowSwitching() throws Exception {}

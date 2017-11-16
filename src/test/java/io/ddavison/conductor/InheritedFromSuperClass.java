@@ -18,6 +18,6 @@ import org.junit.Test;
 public class InheritedFromSuperClass extends SuperClassTest {
     @Test
     public void testInheritsConfigProperly() {
-        setText("[name='q']", "test");
+        setText("[value='some text']", "test");
     }
 }
