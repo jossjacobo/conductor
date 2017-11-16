@@ -3,6 +3,7 @@ package io.ddavison.conductor;
 import io.ddavison.conductor.test.SimpleClassConfig;
 import org.assertj.core.api.Assertions;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -10,10 +11,25 @@ import java.util.Map;
 
 public class ConductorConfigTest {
 
-    @After
-    public void tearDown() {
+    private String envCurrentSchemes, envBaseUrl;
+
+    @Before
+    public void before() {
+        envCurrentSchemes = System.getProperty(ConductorConfig.CONDUCTOR_CURRENT_SCHEMES);
+        envBaseUrl = System.getProperty(ConductorConfig.CONDUCTOR_BASE_URL);
+
         System.clearProperty(ConductorConfig.CONDUCTOR_CURRENT_SCHEMES);
         System.clearProperty(ConductorConfig.CONDUCTOR_BASE_URL);
+    }
+
+    @After
+    public void tearDown() {
+        if (envCurrentSchemes != null) {
+            System.setProperty(ConductorConfig.CONDUCTOR_CURRENT_SCHEMES, envCurrentSchemes);
+        }
+        if (envBaseUrl != null) {
+            System.setProperty(ConductorConfig.CONDUCTOR_BASE_URL, envBaseUrl);
+        }
     }
 
     @Test
