@@ -1,20 +1,9 @@
-/*
- * Copyright 2014-2016 Daniel Davison (http://github.com/ddavison) and Contributors
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
- */
-
 package io.ddavison.conductor;
 
 import com.google.common.base.Strings;
+import io.ddavison.conductor.util.Log;
 import io.ddavison.conductor.util.ScreenShotUtil;
-import io.github.bonigarcia.wdm.*;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.assertj.swing.assertions.Assertions;
 import org.junit.After;
 import org.junit.Rule;
@@ -22,15 +11,7 @@ import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.openqa.selenium.*;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.edge.EdgeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -43,27 +24,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * the base test that includes all Selenium 2 functionality that you will need
- * to get you rolling.
- *
- * @author ddavison
- */
 public class Locomotive implements Conductor<Locomotive> {
 
-    public static final Logger log = LogManager.getLogger(Locomotive.class);
-
-    /**
-     * All test configuration in here
-     */
     public ConductorConfig configuration;
-
     public WebDriver driver;
-
     private int attempts = 0;
-
     public Actions actions;
-
     private Map<String, String> vars = new HashMap<String, String>();
 
     private Pattern p;
@@ -73,98 +39,15 @@ public class Locomotive implements Conductor<Locomotive> {
         Config testConfiguration = getClass().getAnnotation(Config.class);
 
         configuration = new ConductorConfig(testConfiguration);
+        driver = DriverUtil.getDriver(configuration);
 
-        Capabilities capabilities;
-
-        log.debug(String.format("\n=== Configuration ===\n" +
+        Log.debug(String.format("\n=== Configuration ===\n" +
                 "\tURL:     %s\n" +
                 "\tBrowser: %s\n" +
                 "\tHub:     %s\n" +
                 "\tBase url: %s\n", configuration.getUrl(), configuration.getBrowser().moniker, configuration.getHub(), configuration.getBaseUrl()));
 
-        boolean isLocal = configuration.getHub() == null;
-        switch (configuration.getBrowser()) {
-            case CHROME:
-                capabilities = DesiredCapabilities.chrome();
-                if (isLocal) try {
-                    ChromeDriverManager.getInstance().setup();
-
-                    driver = new ChromeDriver(capabilities);
-                } catch (Exception x) {
-                    logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
-                    System.exit(1);
-                }
-                break;
-            case FIREFOX:
-                capabilities = DesiredCapabilities.firefox();
-                if (isLocal) try {
-                    FirefoxDriverManager.getInstance().setup();
-                    driver = new FirefoxDriver(capabilities);
-                } catch (Exception x) {
-                    x.printStackTrace();
-                    logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
-                    System.exit(1);
-                }
-                break;
-            case INTERNET_EXPLORER:
-                capabilities = DesiredCapabilities.internetExplorer();
-                if (isLocal) try {
-                    InternetExplorerDriverManager.getInstance().setup();
-                    driver = new InternetExplorerDriver(capabilities);
-                } catch (Exception x) {
-                    x.printStackTrace();
-                    logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
-                    System.exit(1);
-                }
-                break;
-            case EDGE:
-                capabilities = DesiredCapabilities.edge();
-                if (isLocal) try {
-                    EdgeDriverManager.getInstance().setup();
-                    driver = new EdgeDriver(capabilities);
-                } catch (Exception x) {
-                    x.printStackTrace();
-                    logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
-                    System.exit(1);
-                }
-                break;
-            case SAFARI:
-                capabilities = DesiredCapabilities.safari();
-                if (isLocal) try {
-                    driver = new SafariDriver(capabilities);
-                } catch (Exception x) {
-                    x.printStackTrace();
-                    logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
-                    System.exit(1);
-                }
-                break;
-            case PHANTOMJS:
-                capabilities = DesiredCapabilities.phantomjs();
-                if (isLocal) try {
-                    PhantomJsDriverManager.getInstance().setup();
-                    driver = new PhantomJSDriver(capabilities);
-                } catch (Exception x) {
-                    x.printStackTrace();
-                    logFatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
-                    System.exit(1);
-                }
-                break;
-            default:
-                System.err.println("Unknown browser: " + configuration.getBrowser());
-                return;
-        }
-
-        if (!isLocal)
-            try {
-                driver = new RemoteWebDriver(configuration.getHub(), capabilities);
-            } catch (Exception x) {
-                logFatal("Couldn't connect to hub: " + configuration.getHub().toString());
-                x.printStackTrace();
-                return;
-            }
-
         actions = new Actions(driver);
-
 
         // Automatically start test on url
         if (StringUtils.isNotEmpty(configuration.getUrl())) {
@@ -856,27 +739,27 @@ public class Locomotive implements Conductor<Locomotive> {
     }
 
     public Locomotive logInfo(Object object) {
-        log.info(object);
+        Log.debug(object);
         return this;
     }
 
     public Locomotive logWarn(Object object) {
-        log.warn(object);
+        Log.warning(object);
         return this;
     }
 
     public Locomotive logError(Object object) {
-        log.error(object);
+        Log.fatal(object);
         return this;
     }
 
     public Locomotive logDebug(Object object) {
-        log.debug(object);
+        Log.debug(object);
         return this;
     }
 
     public Locomotive logFatal(Object object) {
-        log.fatal(object);
+        Log.fatal(object);
         return this;
     }
 }
