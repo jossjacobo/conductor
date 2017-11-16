@@ -1,7 +1,6 @@
 package io.ddavison.conductor;
 
 import com.google.common.base.Strings;
-import io.ddavison.conductor.util.Log;
 import io.ddavison.conductor.util.ScreenShotUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.swing.assertions.Assertions;
@@ -16,6 +15,7 @@ import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.pmw.tinylog.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +41,7 @@ public class Locomotive implements Conductor<Locomotive> {
         configuration = new ConductorConfig(testConfiguration);
         driver = DriverUtil.getDriver(configuration);
 
-        Log.debug(String.format("\n=== Configuration ===\n" +
+        Logger.debug(String.format("\n=== Configuration ===\n" +
                 "\tURL:     %s\n" +
                 "\tBrowser: %s\n" +
                 "\tHub:     %s\n" +
@@ -116,7 +116,7 @@ public class Locomotive implements Conductor<Locomotive> {
         }
 
         if (size > 1) {
-            System.err.println("WARN: There are more than 1 " + by.toString() + " 's!");
+            Logger.error("WARN: There are more than 1 %s 's!", by.toString());
         }
 
         return driver.findElement(by);
@@ -378,7 +378,7 @@ public class Locomotive implements Conductor<Locomotive> {
                     try {
                         Thread.sleep(1000);
                     } catch (Exception x) {
-                        x.printStackTrace();
+                        Logger.error(x);
                     }
 
                     return waitForWindow(regex);
@@ -393,12 +393,12 @@ public class Locomotive implements Conductor<Locomotive> {
             Assertions.fail("Window with title: " + regex + " did not appear after " + configuration.getRetries() + " tries. Exiting.");
             return this;
         } else {
-            System.out.println("#waitForWindow() : Window doesn't exist yet. [" + regex + "] Trying again. " + (attempts + 1) + "/" + configuration.getRetries());
+            Logger.info("#waitForWindow() : Window doesn't exist yet. [%s] Trying again. %s/%s", regex, (attempts + 1), configuration.getRetries());
             attempts++;
             try {
                 Thread.sleep(1000);
-            } catch (Exception x) {
-                x.printStackTrace();
+            } catch (Exception e) {
+                Logger.error(e);
             }
             return waitForWindow(regex);
         }
@@ -409,9 +409,9 @@ public class Locomotive implements Conductor<Locomotive> {
 
         for (String window : windows) {
             driver.switchTo().window(window);
-            System.out.println(String.format("#switchToWindow() : title=%s ; url=%s",
+            Logger.info("#switchToWindow() : title=%s ; url=%s",
                     driver.getTitle(),
-                    driver.getCurrentUrl()));
+                    driver.getCurrentUrl());
 
             p = Pattern.compile(regex);
             m = p.matcher(driver.getTitle());
@@ -739,27 +739,27 @@ public class Locomotive implements Conductor<Locomotive> {
     }
 
     public Locomotive logInfo(Object object) {
-        Log.debug(object);
+        Logger.debug(object);
         return this;
     }
 
     public Locomotive logWarn(Object object) {
-        Log.warning(object);
+        Logger.warn(object);
         return this;
     }
 
     public Locomotive logError(Object object) {
-        Log.fatal(object);
+        Logger.error(object);
         return this;
     }
 
     public Locomotive logDebug(Object object) {
-        Log.debug(object);
+        Logger.debug(object);
         return this;
     }
 
     public Locomotive logFatal(Object object) {
-        Log.fatal(object);
+        Logger.error(object);
         return this;
     }
 }

@@ -1,7 +1,7 @@
 package io.ddavison.conductor;
 
-import io.ddavison.conductor.util.Log;
 import okhttp3.HttpUrl;
+import org.pmw.tinylog.Logger;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -59,7 +59,7 @@ public class ConductorConfig {
                 readConfig(is, classConfig);
             }
         } catch (Exception e) {
-            Log.fatal("Couldn't load default conductor config! " + e.toString());
+            Logger.error(e, "Couldn't load default conductor config!");
         }
     }
 
@@ -149,7 +149,7 @@ public class ConductorConfig {
                     foundMethod.invoke(this, value);
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
-                Log.log.warning("Could not invoke method '" + methodName + "': " + e.toString());
+                Logger.warn(e,"Could not invoke method '%s'", methodName);
             }
         }
     }
@@ -225,7 +225,7 @@ public class ConductorConfig {
             try {
                 url = new URL(hub);
             } catch (MalformedURLException e) {
-                Log.fatal("Failure parsing url: " + e.toString());
+                Logger.error(e,"Failure parsing url");
             }
         }
 

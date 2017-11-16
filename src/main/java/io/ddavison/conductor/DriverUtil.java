@@ -1,6 +1,5 @@
 package io.ddavison.conductor;
 
-import io.ddavison.conductor.util.Log;
 import io.github.bonigarcia.wdm.ChromeDriverManager;
 import io.github.bonigarcia.wdm.EdgeDriverManager;
 import io.github.bonigarcia.wdm.FirefoxDriverManager;
@@ -19,6 +18,7 @@ import org.openqa.selenium.ie.InternetExplorerOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
+import org.pmw.tinylog.Logger;
 
 public class DriverUtil {
 
@@ -79,7 +79,7 @@ public class DriverUtil {
                     }
                     break;
                 default:
-                    System.err.println("Unknown browser: " + config.getBrowser());
+                    Logger.error("Unknown browser: " + config.getBrowser());
                     return null;
             }
 
@@ -87,12 +87,11 @@ public class DriverUtil {
                 try {
                     driver = new RemoteWebDriver(config.getHub(), capabilities);
                 } catch (Exception e) {
-                    Log.fatal("Couldn't connect to hub: " + config.getHub().toString());
-                    e.printStackTrace();
+                    Logger.error(e, "Couldn't connect to hub: " + config.getHub().toString());
                 }
             }
-        } catch (Exception x) {
-            Log.fatal("Also see https://github.com/conductor-framework/conductor/wiki/WebDriver-Executables");
+        } catch (Exception e) {
+            Logger.error(e, "Probably a WebDriver issue, see https://github.com/bonigarcia/webdrivermanager");
             System.exit(1);
         }
         return driver;
