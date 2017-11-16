@@ -59,8 +59,13 @@ public class ConductorConfigTest {
                 .containsAllEntriesOf(customCapabilities);
     }
 
+    /**
+     * This test will clear the current schemes environment variable to verify yaml schemes override defaults
+     */
     @Test
-    public void config_overrides_with_current_schemes() {
+    public void config_overrides_with_current_schemes_excluding_environment_variables() {
+        System.clearProperty(ConductorConfig.CONDUCTOR_CURRENT_SCHEMES);
+
         ConductorConfig config = new ConductorConfig("/test_yaml/schemes.yaml");
 
         Assertions.assertThat(config.getBrowser())
