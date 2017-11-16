@@ -158,7 +158,7 @@ public class ConductorConfigTest {
     @Test
     public void class_config_overrides_defaults() {
         Config classConfig = new SimpleClassConfig();
-        ConductorConfig config = new ConductorConfig(classConfig);
+        ConductorConfig config = new ConductorConfig("/test_yaml/simple.yaml", classConfig);
 
         Assertions.assertThat(config.getBrowser())
                 .isEqualTo(Browser.SAFARI);
