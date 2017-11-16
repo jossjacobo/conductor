@@ -1,4 +1,6 @@
 defaults:
   browser: CHROME
   baseUrl: http://ddavison.io/
-  screenshotsOnFail: true
+
+chrome:
+  browser: CHROME
