@@ -124,18 +124,20 @@ public class ConductorConfigTest {
 
     @Test
     public void environment_platform_name_overrides_config() {
-        System.setProperty("conductorBaseUrl", "http://iamawesome.com/");
+        System.setProperty(ConductorConfig.CONDUCTOR_BASE_URL, "http://iamawesome.com/");
         ConductorConfig config = new ConductorConfig("/test_yaml/all.yaml");
 
         Assertions.assertThat(config.getBaseUrl())
                 .isEqualTo("http://iamawesome.com/");
         Assertions.assertThat(config.getBrowser())
                 .isEqualTo(Browser.CHROME);
+
+        System.clearProperty(ConductorConfig.CONDUCTOR_BASE_URL);
     }
 
     @Test
     public void environment_schemes_overrides_config() {
-        System.setProperty("conductorCurrentSchemes", "shorter_timeouts,stage-dev,firefox");
+        System.setProperty(ConductorConfig.CONDUCTOR_CURRENT_SCHEMES, "shorter_timeouts,stage-dev,firefox");
         ConductorConfig config = new ConductorConfig("/test_yaml/all.yaml");
 
         Assertions.assertThat(config.getBrowser())
@@ -148,11 +150,13 @@ public class ConductorConfigTest {
                 .isEqualTo(5);
         Assertions.assertThat(config.isScreenshotOnFail())
                 .isTrue();
+
+        System.clearProperty(ConductorConfig.CONDUCTOR_CURRENT_SCHEMES);
     }
 
     @Test
     public void empty_environment_schemes_clears_yaml_schemes() {
-        System.setProperty("conductorCurrentSchemes", "");
+        System.setProperty(ConductorConfig.CONDUCTOR_CURRENT_SCHEMES, "");
         ConductorConfig config = new ConductorConfig("/test_yaml/all.yaml");
 
         Assertions.assertThat(config.getBrowser())
@@ -165,6 +169,8 @@ public class ConductorConfigTest {
                 .isEqualTo(10);
         Assertions.assertThat(config.isScreenshotOnFail())
                 .isTrue();
+
+        System.clearProperty(ConductorConfig.CONDUCTOR_CURRENT_SCHEMES);
     }
 
     @Test
