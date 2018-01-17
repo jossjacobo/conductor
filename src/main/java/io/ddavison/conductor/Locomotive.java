@@ -1,14 +1,11 @@
 package io.ddavison.conductor;
 
 import com.google.common.base.Strings;
-import io.ddavison.conductor.util.ScreenShotUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.swing.assertions.Assertions;
-import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TestRule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedCondition;
@@ -16,6 +13,9 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.pmw.tinylog.Logger;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,18 +24,30 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Locomotive implements Conductor<Locomotive> {
+/**
+ * the base test that includes all Selenium 2 functionality that you will need
+ * to get you rolling.
+ *
+ * @author ddavison
+ */
+@Listeners(TestListener.class)
+public class Locomotive extends Watchman implements Conductor<Locomotive> {
 
     public ConductorConfig configuration;
     public WebDriver driver;
     private int attempts = 0;
-    public Actions actions;
-    private Map<String, String> vars = new HashMap<String, String>();
+    private Actions actions;
+    private Map<String, String> vars = new HashMap<>();
 
     private Pattern p;
     private Matcher m;
 
     public Locomotive() {
+    }
+
+    @Before
+    @BeforeMethod(alwaysRun = true)
+    public void init() {
         Config testConfiguration = getClass().getAnnotation(Config.class);
 
         configuration = new ConductorConfig(testConfiguration);
@@ -56,43 +68,15 @@ public class Locomotive implements Conductor<Locomotive> {
     }
 
     @Rule
-    public TestRule watchman = new TestWatcher() {
-        boolean failure;
-        Throwable e;
-        Description description;
+    public TestRule watchman = this;
 
+    public Locomotive getLocomotive() {
+        return this;
+    }
 
-        @Override
-        protected void failed(Throwable e, Description description) {
-            if (configuration.isScreenshotOnFail()) {
-                failure = true;
-                this.e = e;
-                this.description = description;
-            }
-        }
-
-        /**
-         * Take screenshot if the test failed.
-         */
-        @Override
-        protected void finished(Description description) {
-            super.finished(description);
-            if (configuration.isScreenshotOnFail()) {
-                if (failure) {
-                    ScreenShotUtil.take(Locomotive.this,
-                            description.getDisplayName(),
-                            e.getMessage() != null ? e.getMessage() : e.toString());
-                }
-                Locomotive.this.driver.quit();
-            }
-        }
-    };
-
-    @After
-    public void teardown() {
-        if (!configuration.isScreenshotOnFail()) {
-            driver.quit();
-        }
+    @AfterMethod(alwaysRun = true)
+    public void quit() {
+        driver.quit();
     }
 
     public WebElement waitForElement(String css) {
@@ -496,7 +480,7 @@ public class Locomotive implements Conductor<Locomotive> {
 
     /**
      * Scroll to a specified element and attempt to center it in the viewport
-     *
+     * <p>
      * See <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/scrollIntoView">MDN web docs Element.scrollIntoView()</a>
      *
      * @param element to scroll to
