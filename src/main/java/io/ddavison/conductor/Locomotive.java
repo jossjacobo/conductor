@@ -74,7 +74,9 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
         return this;
     }
 
-    @AfterMethod(alwaysRun = true)
+    /**
+     * The {@link Watchman} & {@link TestListener} classes will call this method upon test completion.
+     */
     public void quit() {
         driver.quit();
     }
