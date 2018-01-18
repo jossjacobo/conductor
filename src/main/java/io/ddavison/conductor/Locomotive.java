@@ -84,6 +84,7 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
     public void quit() {
         if (getDriver() != null) {
             getDriver().quit();
+            driver.remove();
         }
     }
 
