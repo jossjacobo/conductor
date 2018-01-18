@@ -1,11 +1,11 @@
 package io.ddavison.conductor;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
@@ -19,9 +19,10 @@ public class FrameworkTest extends Locomotive {
 
     private static final String NEW_TAB_LINK_CSS = "a[href='http://google.com']";
 
-    @Before
+    @BeforeMethod(alwaysRun = true)
     public void navigateToLocalHtml() {
         navigateTo(TEST_HTML_FILE);
+        waitForElement(By.id("click"));
     }
 
     @Test
@@ -114,7 +115,7 @@ public class FrameworkTest extends Locomotive {
     /**
      * Verifies {@link #isInView(String)} returns false for an element not in view.
      */
-    @Test
+    @Test(groups = {"modifies-env-vars"})
     public void testIsInViewNegative() {
         // setup the test page to not be able to see the open new tab link
         getDriver().manage().window().setSize(new Dimension(200, 200));

@@ -4,6 +4,7 @@ import io.ddavison.conductor.Locomotive;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.pmw.tinylog.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,10 +27,12 @@ public class ScreenShotUtil {
     }
 
     private static void writeFile(TakesScreenshot takesScreenshot, String filePathAndName) {
-        try {
-            FileUtils.copyFile(takesScreenshot.getScreenshotAs(OutputType.FILE), new File(filePathAndName));
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (takesScreenshot != null && filePathAndName != null) {
+            try {
+                FileUtils.copyFile(takesScreenshot.getScreenshotAs(OutputType.FILE), new File(filePathAndName));
+            } catch (IOException e) {
+                Logger.error(e);
+            }
         }
     }
 

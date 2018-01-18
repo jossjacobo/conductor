@@ -24,7 +24,7 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onTestFailure(ITestResult result) {
-        if (driver.configuration.isScreenshotOnFail()) {
+        if (driver.configuration != null && driver.configuration.isScreenshotOnFail()) {
             ScreenShotUtil.take(driver,
                     result.getTestClass().getName() + "." + result.getMethod().getMethodName(),
                     result.getThrowable().getMessage());
