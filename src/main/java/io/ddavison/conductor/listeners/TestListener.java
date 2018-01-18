@@ -1,5 +1,6 @@
-package io.ddavison.conductor;
+package io.ddavison.conductor.listeners;
 
+import io.ddavison.conductor.Locomotive;
 import io.ddavison.conductor.util.ScreenShotUtil;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
@@ -11,7 +12,9 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onTestStart(ITestResult iTestResult) {
-        driver = (Locomotive) iTestResult.getInstance();
+        if (iTestResult.getInstance() instanceof Locomotive) {
+            driver = (Locomotive) iTestResult.getInstance();
+        }
     }
 
     @Override
@@ -25,6 +28,7 @@ public class TestListener implements ITestListener {
             ScreenShotUtil.take(driver,
                     result.getTestClass().getName() + "." + result.getMethod().getMethodName(),
                     result.getThrowable().getMessage());
+            driver.quit();
         }
     }
 
@@ -45,6 +49,8 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onFinish(ITestContext iTestContext) {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }

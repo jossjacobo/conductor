@@ -117,7 +117,7 @@ public class FrameworkTest extends Locomotive {
     @Test
     public void testIsInViewNegative() {
         // setup the test page to not be able to see the open new tab link
-        driver.manage().window().setSize(new Dimension(200, 200));
+        getDriver().manage().window().setSize(new Dimension(200, 200));
 
         assertThat(isInView(NEW_TAB_LINK_CSS)).isFalse();
     }
@@ -132,7 +132,7 @@ public class FrameworkTest extends Locomotive {
         final WebElement newTabLink = waitForElement(NEW_TAB_LINK_CSS);
 
         // setup the test page to make scrolling necessary: expect to not see the open new tab link
-        driver.manage().window().setSize(new Dimension(200, 200));
+        getDriver().manage().window().setSize(new Dimension(200, 200));
 
         // scroll to the link
         scrollTo(NEW_TAB_LINK_CSS);

@@ -1,5 +1,6 @@
-package io.ddavison.conductor;
+package io.ddavison.conductor.listeners;
 
+import io.ddavison.conductor.Locomotive;
 import io.ddavison.conductor.util.ScreenShotUtil;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
