@@ -34,15 +34,15 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onTestSkipped(ITestResult iTestResult) {
-        if (driver != null) {
-            driver.quit();
+        if (iTestResult.getInstance() instanceof Locomotive) {
+            ((Locomotive) iTestResult.getInstance()).quit();
         }
     }
 
     @Override
     public void onTestFailedButWithinSuccessPercentage(ITestResult iTestResult) {
-        if (driver != null) {
-            driver.quit();
+        if (iTestResult.getInstance() instanceof Locomotive) {
+            ((Locomotive) iTestResult.getInstance()).quit();
         }
     }
 
