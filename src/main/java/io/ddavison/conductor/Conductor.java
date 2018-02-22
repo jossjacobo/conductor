@@ -194,6 +194,15 @@ public interface Conductor<Test> {
         Validations
      */
     /**
+     * When an assertion fails, don't throw an exception but record the failure.
+     * Calling {@code assertAll()} will cause an exception to be thrown if at
+     * least one assertion failed.
+     */
+    Test softAssert(String css);
+    Test softAssert(By by);
+    Test softAssert(String css, String text);
+    Test softAssert(By by, String text);
+    /**
      * Validates that an element is present.
      * @param css/by The element
      * @return The implementing class for fluency

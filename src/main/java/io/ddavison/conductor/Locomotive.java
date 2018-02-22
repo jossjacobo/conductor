@@ -19,6 +19,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.pmw.tinylog.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
+import org.testng.asserts.SoftAssert;
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,7 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
     private int attempts = 0;
     private Actions actions;
     private Map<String, String> vars = new HashMap<>();
+    private SoftAssert softAssert = new SoftAssert();
 
     private Pattern p;
     private Matcher m;
@@ -538,6 +540,43 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
     /* ************************ */
 
     /* Validation Functions for Testing */
+
+    /**
+     *
+     */
+    // Could change name to softAssertEquals for clarity?
+    public Locomotive softAssert(String css, String text) {
+        return softAssert(By.cssSelector(css), text);
+    }
+    /**
+     * @param by is the selector
+     * @param text is what the selector should be equal to
+     *
+     */
+    // Could change name of this method to softAssertEquals for clarity?
+    public Locomotive softAssert(By by, String text) {
+        waitForElement(by);
+        softAssert.assertEquals(by, text);
+        return this;
+    }
+    // Could change name of this method to softAssertTrue for clarity?
+    public Locomotive softAssert(String css) {
+        return softAssert(By.cssSelector(css));
+    }
+    /**
+     * @param by is the selector/accessibility id
+     *
+     */
+    // Could change name of this method to softAssertTrue for clarity?
+    public Locomotive softAssert(By by) {
+        waitForElement(by);
+        softAssert.assertTrue(isPresent(by));
+        return this;
+    }
+    public Locomotive assertAll() {
+        softAssert.assertAll();
+        return this;
+    }
 
     public Locomotive validatePresent(String css) {
         return validatePresent(By.cssSelector(css));
