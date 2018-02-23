@@ -142,4 +142,31 @@ public class FrameworkTest extends Locomotive {
         assertThat(isInView(newTabLink)).isTrue();
     }
 
+    /**
+     * Testing softAssert validatePresent (This test is supposed to fail after assertAll)
+     */
+    @Test
+    public void testSoftAssertValidateShouldFail() {
+        softAssert(By.cssSelector("#click"))
+                .softAssert(By.cssSelector("#setTextField"))
+                .softAssert(By.cssSelector("#textArea"))
+                .softAssert(By.cssSelector("#select"))
+                .softAssert(By.cssSelector("#shouldFailTest"));
+        System.out.println("Verify that test keep running after softAssert Fails to make sure softAssert is working as intended");
+        assertAll();
+    }
+
+    /**
+     * Testing softAssert validatePresent (This test is supposed to pass after assertAll)
+     */
+    @Test
+    public void testSoftAssertValidate() {
+        softAssert(By.cssSelector("#click"))
+                .softAssert(By.cssSelector("#setTextField"))
+                .softAssert(By.cssSelector("#textArea"))
+                .softAssert(By.cssSelector("#select"));
+        assertAll();
+    }
+
+
 }
