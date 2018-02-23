@@ -200,8 +200,8 @@ public interface Conductor<Test> {
      */
     Test softAssert(String css);
     Test softAssert(By by);
-    Test softAssert(String css, String text);
-    Test softAssert(By by, String text);
+    Test assertAll();
+
     /**
      * Validates that an element is present.
      * @param css/by The element
