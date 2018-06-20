@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,9 +26,10 @@ public class ConductorConfig {
     static final String CONDUCTOR_BASE_URL_OLD = "CONDUCTOR_BASE_URL";
 
     // YAML Keys
-    private static final String DEFAULTS = "defaults";
-    private static final String CURRENT_SCHEMES = "currentSchemes";
+    private static final String DEFAULTS            = "defaults";
+    private static final String CURRENT_SCHEMES     = "currentSchemes";
     private static final String CUSTOM_CAPABILITIES = "customCapabilities";
+    private static final String CHROME_ARGUMENTS    = "chromeArguments";
 
     // Conductor properties
     private String baseUrl = "";
@@ -41,6 +43,7 @@ public class ConductorConfig {
     // Selenium Properties
     private Browser browser = Browser.NONE;
     private String hub;
+    private List<String> arguments = new LinkedList<>();
 
     public ConductorConfig() {
         this(DEFAULT_CONFIG_FILE, null);
@@ -117,6 +120,8 @@ public class ConductorConfig {
         for (String key : properties.keySet()) {
             if (key.equals(CUSTOM_CAPABILITIES)) {
                 setCustomCapabilities(properties.get(key));
+            } else if (key.equals(CHROME_ARGUMENTS)) {
+                setArguments(properties.get(key));
             } else {
                 setProperty(key, properties.get(key).toString());
             }
@@ -257,6 +262,18 @@ public class ConductorConfig {
             throw new ClassCastException(String.format("%s is expected to be a String list of key/value pairs", CUSTOM_CAPABILITIES));
         }
         setCustomCapabilities(custom);
+    }
+
+    private void setArguments(Object listArguments) {
+        try {
+            this.arguments.addAll((List) listArguments);
+        } catch(ClassCastException e) {
+            throw new ClassCastException(String.format("%s is expected to be a String list", CHROME_ARGUMENTS));
+        }
+    }
+
+    public List<String> getArguments() {
+        return arguments;
     }
 
     public void setCustomCapabilities(Map<String, String> customCapabilities) {

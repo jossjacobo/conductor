@@ -33,6 +33,7 @@ public class DriverUtil {
                 case CHROME:
                     ChromeOptions chromeOptions = new ChromeOptions();
                     setCustomCapabilities(config, chromeOptions);
+                    chromeOptions.addArguments(config.getArguments());
                     capabilities = chromeOptions;
 
                     if (isLocal) {
