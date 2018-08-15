@@ -14,7 +14,7 @@
             <package name="io.ddavison.conductor"/>
         </packages>
     </test>
-    <test name="All Other Tests in Parallel" parallel="methods" thread-count="10">
+    <test name="All Other Tests in Parallel" parallel="methods" thread-count="5">
         <groups>
             <define name="All">
                 <include name="modifies-env-vars" />
