@@ -62,7 +62,7 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
         Config testConfiguration = getClass().getAnnotation(Config.class);
         configuration = new ConductorConfig(testConfiguration);
 
-        DesiredCapabilities capabilities = onCapabilitiesCreated(getCapabilities(configuration));
+        DesiredCapabilities capabilities = onCapabilitiesCreated(buildCapabilities(configuration));
         driver.set(DriverUtil.getDriver(configuration,capabilities));
 
         Logger.debug(String.format("\n=== Configuration ===\n" +
@@ -82,14 +82,6 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
 
     protected DesiredCapabilities onCapabilitiesCreated(DesiredCapabilities desiredCapabilities) {
         return desiredCapabilities;
-    }
-
-    private DesiredCapabilities getCapabilities(ConductorConfig configuration) {
-        DesiredCapabilities capabilities;
-        capabilities = buildCapabilities(configuration);
-
-        return capabilities;
-
     }
 
 
