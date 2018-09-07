@@ -37,8 +37,8 @@ public class DriverUtil {
             switch (config.getBrowser()) {
                 case CHROME:
                     ChromeOptions chromeOptions = new ChromeOptions();
-                    setCustomCapabilities(config, chromeOptions, desiredCapabilities);
-                    capabilities = chromeOptions;
+
+                    capabilities = setCustomCapabilities(config, chromeOptions, desiredCapabilities);
 
                     if (isLocal) {
                         ChromeDriverManager.getInstance().setup();
@@ -47,8 +47,8 @@ public class DriverUtil {
                     break;
                 case FIREFOX:
                     FirefoxOptions firefoxOptions = new FirefoxOptions();
-                    setCustomCapabilities(config, firefoxOptions, desiredCapabilities);
-                    capabilities = firefoxOptions;
+
+                    capabilities = setCustomCapabilities(config, firefoxOptions, desiredCapabilities);
 
                     if (isLocal) {
                         FirefoxDriverManager.getInstance().setup();
@@ -57,8 +57,8 @@ public class DriverUtil {
                     break;
                 case INTERNET_EXPLORER:
                     InternetExplorerOptions internetExplorerOptions = new InternetExplorerOptions();
-                    setCustomCapabilities(config, internetExplorerOptions, desiredCapabilities);
-                    capabilities = internetExplorerOptions;
+
+                    capabilities = setCustomCapabilities(config, internetExplorerOptions, desiredCapabilities);
 
                     if (isLocal) {
                         InternetExplorerDriverManager.getInstance().setup();
@@ -67,8 +67,8 @@ public class DriverUtil {
                     break;
                 case EDGE:
                     EdgeOptions edgeOptions = new EdgeOptions();
-                    setCustomCapabilities(config, edgeOptions, desiredCapabilities);
-                    capabilities = edgeOptions;
+
+                    capabilities = setCustomCapabilities(config, edgeOptions, desiredCapabilities);
 
                     if (isLocal) {
                         EdgeDriverManager.getInstance().setup();
@@ -104,6 +104,7 @@ public class DriverUtil {
     }
 
     public static MutableCapabilities setCustomCapabilities(ConductorConfig config, MutableCapabilities capabilities, DesiredCapabilities customDesiredCapabilities) {
+
         MutableCapabilities newCapabilities = new MutableCapabilities(capabilities);
 
         if (!config.getCustomCapabilities().isEmpty()) {
@@ -112,9 +113,15 @@ public class DriverUtil {
             }
         }
 
+        if (capabilities != null) {
+            for (String key : capabilities.asMap().keySet()) {
+                newCapabilities.setCapability(key, capabilities.asMap().get(key));
+            }
+        }
+
         if (customDesiredCapabilities != null) {
             for (String key : customDesiredCapabilities.asMap().keySet()) {
-                newCapabilities.setCapability(key, config.getCustomCapabilities().get(key));
+                newCapabilities.setCapability(key, customDesiredCapabilities.asMap().get(key));
             }
         }
 
