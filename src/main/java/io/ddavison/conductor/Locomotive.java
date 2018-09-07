@@ -63,7 +63,7 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
         configuration = new ConductorConfig(testConfiguration);
 
         DesiredCapabilities capabilities = onCapabilitiesCreated(buildCapabilities(configuration));
-        driver.set(DriverUtil.getDriver(configuration,capabilities));
+        driver.set(DriverUtil.getDriver(configuration, capabilities));
 
         Logger.debug(String.format("\n=== Configuration ===\n" +
                 "\tURL:     %s\n" +
@@ -96,7 +96,6 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
 
         return capabilities;
     }
-
 
 
     @Rule

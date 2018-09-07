@@ -24,64 +24,59 @@ import org.pmw.tinylog.Logger;
 
 public class DriverUtil {
 
-    public static WebDriver getDriver(ConductorConfig config) {
-        return getDriver(config, null);
-    }
-
     public static WebDriver getDriver(ConductorConfig config, DesiredCapabilities desiredCapabilities) {
         WebDriver driver = null;
-        Capabilities capabilities;
-
+        Capabilities capabilities = new DesiredCapabilities();
         boolean isLocal = config.getHub() == null;
         try {
             switch (config.getBrowser()) {
                 case CHROME:
-                    ChromeOptions chromeOptions = new ChromeOptions();
-
-                    capabilities = setCustomCapabilities(config, chromeOptions, desiredCapabilities);
-
+                    ChromeOptions chromeOptions = new ChromeOptions()
+                            .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
                         ChromeDriverManager.getInstance().setup();
                         driver = new ChromeDriver(chromeOptions);
+                    } else {
+                        capabilities = chromeOptions;
                     }
                     break;
                 case FIREFOX:
-                    FirefoxOptions firefoxOptions = new FirefoxOptions();
-
-                    capabilities = setCustomCapabilities(config, firefoxOptions, desiredCapabilities);
-
+                    FirefoxOptions firefoxOptions = new FirefoxOptions()
+                            .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
                         FirefoxDriverManager.getInstance().setup();
                         driver = new FirefoxDriver(firefoxOptions);
+                    } else {
+                        capabilities = firefoxOptions;
                     }
                     break;
                 case INTERNET_EXPLORER:
-                    InternetExplorerOptions internetExplorerOptions = new InternetExplorerOptions();
-
-                    capabilities = setCustomCapabilities(config, internetExplorerOptions, desiredCapabilities);
-
+                    InternetExplorerOptions internetExplorerOptions = new InternetExplorerOptions()
+                            .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
                         InternetExplorerDriverManager.getInstance().setup();
                         driver = new InternetExplorerDriver(internetExplorerOptions);
+                    } else {
+                        capabilities = internetExplorerOptions;
                     }
                     break;
                 case EDGE:
-                    EdgeOptions edgeOptions = new EdgeOptions();
-
-                    capabilities = setCustomCapabilities(config, edgeOptions, desiredCapabilities);
-
+                    EdgeOptions edgeOptions = new EdgeOptions()
+                            .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
                         EdgeDriverManager.getInstance().setup();
                         driver = new EdgeDriver(edgeOptions);
+                    } else {
+                        capabilities = edgeOptions;
                     }
                     break;
                 case SAFARI:
-                    SafariOptions safariOptions = new SafariOptions();
-
-                    capabilities = setCustomCapabilities(config, safariOptions, desiredCapabilities);
-
+                    SafariOptions safariOptions = new SafariOptions()
+                            .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
                         driver = new SafariDriver(safariOptions);
+                    } else {
+                        capabilities = safariOptions;
                     }
                     break;
                 default:
@@ -103,28 +98,17 @@ public class DriverUtil {
         return driver;
     }
 
-    public static MutableCapabilities setCustomCapabilities(ConductorConfig config, MutableCapabilities capabilities, DesiredCapabilities customDesiredCapabilities) {
-
-        MutableCapabilities newCapabilities = new MutableCapabilities(capabilities);
-
-        if (!config.getCustomCapabilities().isEmpty()) {
-            for (String key : config.getCustomCapabilities().keySet()) {
-                newCapabilities.setCapability(key, config.getCustomCapabilities().get(key));
+    public static MutableCapabilities buildCustomCapabilities(ConductorConfig conductorConfig,
+                                                              DesiredCapabilities customDesiredCapabilities) {
+        MutableCapabilities newCapabilities = new MutableCapabilities();
+        if (!conductorConfig.getCustomCapabilities().isEmpty()) {
+            for (String key : conductorConfig.getCustomCapabilities().keySet()) {
+                newCapabilities.setCapability(key, conductorConfig.getCustomCapabilities().get(key));
             }
         }
-
-        if (capabilities != null) {
-            for (String key : capabilities.asMap().keySet()) {
-                newCapabilities.setCapability(key, capabilities.asMap().get(key));
-            }
+        if (customDesiredCapabilities != null && !customDesiredCapabilities.asMap().isEmpty()) {
+            newCapabilities.merge(customDesiredCapabilities);
         }
-
-        if (customDesiredCapabilities != null) {
-            for (String key : customDesiredCapabilities.asMap().keySet()) {
-                newCapabilities.setCapability(key, customDesiredCapabilities.asMap().get(key));
-            }
-        }
-
         return newCapabilities;
     }
 
