@@ -98,7 +98,6 @@ public class DriverUtil {
         return driver;
     }
 
-
     public static MutableCapabilities buildCustomCapabilities(ConductorConfig conductorConfig,
                                                               DesiredCapabilities customDesiredCapabilities) {
         MutableCapabilities newCapabilities = new MutableCapabilities();
