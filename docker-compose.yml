@@ -1,0 +1,39 @@
+# Drew Gallis <drew.gallis@willowtreeapps.com>
+# Zalenium - Zap - TC Web Agent Implementation
+
+# To Run docker-compose up -d --force-recreate [-d = detached mode]
+
+version: "3"
+services:
+  selenium:
+    image: elgalu/selenium
+    container_name: selenium
+  zalenium-hub:
+    image: dosel/zalenium:latest
+    container_name: zalenium
+    hostname: zalenium
+    ports:
+    - "4444:4444"
+    volumes:
+    - /tmp/videos:/home/seluser/videos
+    - /var/run/docker.sock:/var/run/docker.sock
+    privileged: true
+    restart: always
+    command: >
+      start --desiredContainers 10
+            --maxDockerSeleniumContainers 15
+            --timeZone "Eastern Time"
+            --videoRecordingEnabled false
+            --keepOnlyFailedTests false
+            --maxTestSessions 50
+  maven:
+    image: maven:3.3-jdk-8
+    container_name: maven
+    command: bash -c "mvn install -DskipTests && mvn test -DconductorCurrentSchemes=chrome -Dwdm.chromeDriverVersion=2.35"
+    volumes:
+    - ./:/usr/src/mymaven
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+
