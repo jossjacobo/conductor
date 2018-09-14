@@ -20,7 +20,7 @@ services:
     privileged: true
     restart: always
     command: >
-      start --desiredContainers 5
+      start --desiredContainers 10
             --maxDockerSeleniumContainers 15
             --timeZone "Eastern Time"
             --videoRecordingEnabled false
