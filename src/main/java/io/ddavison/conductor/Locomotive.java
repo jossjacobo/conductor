@@ -1,3 +1,12 @@
+/*
+ * Copyright 2014-2016 Daniel Davison (http://github.com/ddavison) and Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+ */
+
 package io.ddavison.conductor;
 
 import com.google.common.base.Strings;
@@ -12,6 +21,7 @@ import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
@@ -20,6 +30,7 @@ import org.pmw.tinylog.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +48,7 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
     private int attempts = 0;
     private Actions actions;
     private Map<String, String> vars = new HashMap<>();
+    private String testMethodName;
 
     private Pattern p;
     private Matcher m;
@@ -44,13 +56,21 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
     public Locomotive() {
     }
 
+    @BeforeMethod(alwaysRun = true)
+    public void initialize(Method method) {
+        // For testNG get the method name from an injected dependency.
+        this.testMethodName = method.getName();
+        init();
+    }
+
     @Before
     @BeforeMethod(alwaysRun = true)
     public void init() {
         Config testConfiguration = getClass().getAnnotation(Config.class);
-
         configuration = new ConductorConfig(testConfiguration);
-        driver.set(DriverUtil.getDriver(configuration));
+
+        DesiredCapabilities capabilities = onCapabilitiesCreated(buildCapabilities(configuration));
+        driver.set(DriverUtil.getDriver(configuration, capabilities));
 
         Logger.debug(String.format("\n=== Configuration ===\n" +
                 "\tURL:     %s\n" +
@@ -65,6 +85,25 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
             getDriver().navigate().to(configuration.getUrl());
         }
     }
+
+
+    protected DesiredCapabilities onCapabilitiesCreated(DesiredCapabilities desiredCapabilities) {
+        return desiredCapabilities;
+    }
+
+
+    public DesiredCapabilities buildCapabilities(ConductorConfig config) {
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+
+
+        // Set custom capabilities if there are any
+        for (String key : config.getCustomCapabilities().keySet()) {
+            capabilities.setCapability(key, config.getCustomCapabilities().get(key));
+        }
+
+        return capabilities;
+    }
+
 
     @Rule
     public TestRule watchman = this;
@@ -87,6 +126,11 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
             driver.remove();
         }
     }
+
+    public String getTestMethodName() {
+        return testMethodName;
+    }
+
 
     public WebElement waitForElement(String css) {
         return waitForElement(By.cssSelector(css));
