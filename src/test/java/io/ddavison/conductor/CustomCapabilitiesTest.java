@@ -1,8 +1,12 @@
 package io.ddavison.conductor;
 
 import io.ddavison.conductor.util.DriverUtil;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.assertj.core.api.Assertions;
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -36,29 +40,31 @@ public class CustomCapabilitiesTest {
     @Test(groups = {"modifies-env-vars"})
     public void custom_capabilities_are_being_added() {
         ConductorConfig config = new ConductorConfig("/test_yaml/simple_defaults.yaml");
-        ChromeOptions options = new ChromeOptions();
-        DriverUtil.setCustomCapabilities(config, options);
+        DesiredCapabilities caps = new DesiredCapabilities();
+
+        MutableCapabilities capabilities = DriverUtil.buildCustomCapabilities(config, caps);
 
         Map<String, String> expectedCapabilities = new HashMap<>();
         expectedCapabilities.put("fizz", "buzz");
         expectedCapabilities.put("foo", "bar");
 
-        Assertions.assertThat(options.asMap())
+        Assertions.assertThat(capabilities.asMap())
                 .containsAllEntriesOf(expectedCapabilities);
     }
 
     @Test(groups = {"modifies-env-vars"})
     public void current_scheme_custom_capabilities_are_being_added() {
         ConductorConfig config = new ConductorConfig("/test_yaml/all.yaml");
-        ChromeOptions options = new ChromeOptions();
-        DriverUtil.setCustomCapabilities(config, options);
+        DesiredCapabilities caps = new DesiredCapabilities();
+
+        MutableCapabilities capabilities =  DriverUtil.buildCustomCapabilities(config, caps);
 
         Map<String, String> expectedCapabilities = new HashMap<>();
         expectedCapabilities.put("foo", "bar");
         expectedCapabilities.put("fizz", "buzz");
         expectedCapabilities.put("bar", "foo");
 
-        Assertions.assertThat(options.asMap())
+        Assertions.assertThat(capabilities.asMap())
                 .containsAllEntriesOf(expectedCapabilities);
     }
 }
