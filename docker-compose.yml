@@ -20,20 +20,12 @@ services:
     privileged: true
     restart: always
     command: >
-      start --desiredContainers 10
-            --maxDockerSeleniumContainers 15
+      start --desiredContainers 14
+            --maxDockerSeleniumContainers 14
             --timeZone "Eastern Time"
             --videoRecordingEnabled false
             --keepOnlyFailedTests false
             --maxTestSessions 50
-  maven:
-    image: maven:3.3-jdk-8
-    container_name: maven
-    command: bash -c "mvn install -DskipTests && mvn test -DconductorCurrentSchemes=chrome -Dwdm.chromeDriverVersion=2.35"
-    volumes:
-    - ./:/usr/src/mymaven
-    build:
-      context: .
-      dockerfile: Dockerfile
+
 
 

@@ -1,7 +1,7 @@
 defaults:
   browser: CHROME
   baseUrl: http://google.com
-#  hub: http://zalenium:4444/wd/hub
+  hub: http://zalenium:4444/wd/hub
 
 chrome:
   browser: CHROME

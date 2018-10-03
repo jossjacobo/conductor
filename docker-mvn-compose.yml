@@ -1,0 +1,13 @@
+version: "3"
+services:
+  maven:
+    image: maven:3.3-jdk-8
+    privileged: true
+    container_name: maven
+    working_dir: /usr/src/mymaven
+    command: mvn test
+    volumes:
+    - ./:/usr/src/mymaven
+    build:
+      context: .
+      dockerfile: Dockerfile
