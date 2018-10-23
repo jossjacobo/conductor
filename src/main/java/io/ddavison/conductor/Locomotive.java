@@ -56,16 +56,23 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
     public Locomotive() {
     }
 
-    @BeforeMethod(alwaysRun = true)
-    public void initialize(Method method) {
+    @Before
+    public void init() {
         // For testNG get the method name from an injected dependency.
-        this.testMethodName = method.getName();
-        init();
+        this.testMethodName = this.getTestMethodName();
+        this.initialize();
     }
 
-    @Before
-    @BeforeMethod(alwaysRun = true)
-    public void init() {
+    @BeforeMethod(
+            alwaysRun = true
+    )
+    public void init(Method method) {
+        this.testMethodName = method.getName();
+        this.initialize();
+    }
+
+
+    private void initialize() {
         Config testConfiguration = getClass().getAnnotation(Config.class);
         configuration = new ConductorConfig(testConfiguration);
 
