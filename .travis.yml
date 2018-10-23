@@ -3,18 +3,18 @@ group: stable
 dist: trusty
 os: linux
 jdk:
-- oraclejdk8
+  - oraclejdk8
 cache:
   directories:
   - $HOME/.m2
 before_install:
-- "export DISPLAY=:99.0"
-- "sudo sh -e /etc/init.d/xvfb start"
-- sleep 3 # give xvfb some time to start
+  - "export DISPLAY=:99.0"
+  - "sudo sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
 install:
-- mvn install -DskipTests
+  - mvn install -DskipTests
 script:
-- mvn test -DconductorCurrentSchemes=chrome
+  - mvn test -DconductorCurrentSchemes=chrome
 notifications:
   email: false
 addons:
