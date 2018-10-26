@@ -20,12 +20,24 @@ services:
     privileged: true
     restart: always
     command: >
-      start --desiredContainers 14
-            --maxDockerSeleniumContainers 14
+      start --desiredContainers 10
+            --maxDockerSeleniumContainers 10
             --timeZone "Eastern Time"
             --videoRecordingEnabled false
             --keepOnlyFailedTests false
             --maxTestSessions 50
+  maven:
+        image: maven:3.3-jdk-8
+        privileged: true
+        container_name: maven
+        command: mvn test
+        volumes:
+        - ./:/usr/src/mymaven
+        build:
+          context: .
+          dockerfile: Dockerfile
+        depends_on:
+        - zalenium-hub
 
 
 
