@@ -20,8 +20,8 @@ services:
     privileged: true
     restart: always
     command: >
-      start --desiredContainers 10
-            --maxDockerSeleniumContainers 10
+      start --desiredContainers 1
+            --maxDockerSeleniumContainers 1
             --timeZone "Eastern Time"
             --videoRecordingEnabled false
             --keepOnlyFailedTests false
@@ -38,6 +38,7 @@ services:
           dockerfile: Dockerfile
         depends_on:
         - zalenium-hub
+
 
 
 
