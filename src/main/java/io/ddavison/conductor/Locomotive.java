@@ -395,9 +395,15 @@ public class Locomotive extends Watchman implements Conductor<Locomotive> {
 
     public Locomotive waitForWindow(String regex) {
         Set<String> windows = getDriver().getWindowHandles();
-
         for (String window : windows) {
             try {
+                // Wait before switching tabs so that the new tab can load; else it loads a blank page
+                try {
+                Thread.sleep(100);
+                } catch (Exception x) {
+                    Logger.error(x);
+                }
+
                 getDriver().switchTo().window(window);
 
                 p = Pattern.compile(regex);
