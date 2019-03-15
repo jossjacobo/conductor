@@ -1,6 +1,6 @@
 defaults:
   browser: CHROME
-  baseUrl: http://google.com
+  baseUrl: https://iamawesome.com
 
 chrome:
   browser: CHROME
