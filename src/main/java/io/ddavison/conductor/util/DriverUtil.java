@@ -1,10 +1,7 @@
 package io.ddavison.conductor.util;
 
 import io.ddavison.conductor.ConductorConfig;
-import io.github.bonigarcia.wdm.ChromeDriverManager;
-import io.github.bonigarcia.wdm.EdgeDriverManager;
-import io.github.bonigarcia.wdm.FirefoxDriverManager;
-import io.github.bonigarcia.wdm.InternetExplorerDriverManager;
+import io.github.bonigarcia.wdm.*;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebDriver;
@@ -34,7 +31,7 @@ public class DriverUtil {
                     ChromeOptions chromeOptions = new ChromeOptions()
                             .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
-                        ChromeDriverManager.getInstance().setup();
+                        WebDriverManager.chromedriver().setup();
                         driver = new ChromeDriver(chromeOptions);
                     } else {
                         capabilities = chromeOptions;
@@ -44,7 +41,7 @@ public class DriverUtil {
                     FirefoxOptions firefoxOptions = new FirefoxOptions()
                             .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
-                        FirefoxDriverManager.getInstance().setup();
+                        WebDriverManager.firefoxdriver().setup();
                         driver = new FirefoxDriver(firefoxOptions);
                     } else {
                         capabilities = firefoxOptions;
@@ -54,7 +51,7 @@ public class DriverUtil {
                     InternetExplorerOptions internetExplorerOptions = new InternetExplorerOptions()
                             .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
-                        InternetExplorerDriverManager.getInstance().setup();
+                        WebDriverManager.iedriver().setup();
                         driver = new InternetExplorerDriver(internetExplorerOptions);
                     } else {
                         capabilities = internetExplorerOptions;
@@ -64,7 +61,7 @@ public class DriverUtil {
                     EdgeOptions edgeOptions = new EdgeOptions()
                             .merge(buildCustomCapabilities(config, desiredCapabilities));
                     if (isLocal) {
-                        EdgeDriverManager.getInstance().setup();
+                        WebDriverManager.edgedriver().setup();
                         driver = new EdgeDriver(edgeOptions);
                     } else {
                         capabilities = edgeOptions;
